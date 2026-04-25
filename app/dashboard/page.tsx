@@ -27,9 +27,9 @@ export default async function Dashboard() {
     include: { students: true }
   });
 
-  const presentCount = todaysAttendance.filter((a) => a.status === "present").length;
-  const lateCount = todaysAttendance.filter((a) => a.status === "late").length;
-  const absentCount = todaysAttendance.filter((a) => a.status === "absent").length;
+  const presentCount = todaysAttendance.filter((a: any) => a.status === "present").length;
+  const lateCount = todaysAttendance.filter((a: any) => a.status === "late").length;
+  const absentCount = todaysAttendance.filter((a: any) => a.status === "absent").length;
 
   const totalToday = todaysAttendance.length;
   const presentPercent = totalToday ? Math.round((presentCount / totalToday) * 100) : 0;
@@ -126,7 +126,7 @@ export default async function Dashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {recentAttendance.map((record) => (
+                {recentAttendance.map((record: any) => (
                   <tr key={record.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4 text-sm font-bold text-white">{record.students.full_name}</td>
                     <td className="px-6 py-4 text-xs text-slate-400">{record.students.year} - {record.students.class}</td>
@@ -158,7 +158,7 @@ export default async function Dashboard() {
           </h2>
           <div className="glass-panel p-6 rounded-3xl space-y-6">
             {studentsByYear.length > 0 ? (
-              studentsByYear.map((group, idx) => {
+              studentsByYear.map((group: any, idx: number) => {
                 const percentage = Math.round((group._count.id / totalStudents) * 100);
                 const colors = ['bg-sky-500', 'bg-purple-500', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500'];
                 const color = colors[idx % colors.length];
