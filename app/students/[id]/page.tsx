@@ -35,9 +35,9 @@ export default async function StudentProfile({ params }: { params: Promise<{ id:
 
   // Attendance stats
   const totalAttendance = student.attendance.length;
-  const presentCount = student.attendance.filter(a => a.status === "present").length;
-  const lateCount = student.attendance.filter(a => a.status === "late").length;
-  const absentCount = student.attendance.filter(a => a.status === "absent").length;
+  const presentCount = student.attendance.filter((a: any) => a.status === "present").length;
+  const lateCount = student.attendance.filter((a: any) => a.status === "late").length;
+  const absentCount = student.attendance.filter((a: any) => a.status === "absent").length;
   const presentPercent = totalAttendance ? Math.round((presentCount / totalAttendance) * 100) : 0;
   const latePercent = totalAttendance ? Math.round((lateCount / totalAttendance) * 100) : 0;
   const absentPercent = totalAttendance ? Math.round((absentCount / totalAttendance) * 100) : 0;
@@ -47,11 +47,11 @@ export default async function StudentProfile({ params }: { params: Promise<{ id:
   const brokenRules: any[] = [];
 
   for (const rule of rules) {
-    const atts = [...student.attendance].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const atts = [...student.attendance].sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
     let broken = false;
 
     if (rule.frequency === "separate") {
-      const count = atts.filter(a => a.status === rule.type).length;
+      const count = atts.filter((a: any) => a.status === rule.type).length;
       if (count >= rule.period_days) broken = true;
     } else if (rule.frequency === "continuous") {
       let streak = 0;
