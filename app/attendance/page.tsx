@@ -21,7 +21,7 @@ export default async function AttendancePage() {
   });
 
   // Serialize dates for Client Component
-  const serializedData = attendanceData.map((record) => ({
+  const serializedData = attendanceData.map((record: any) => ({
     ...record,
     date: record.date.toISOString(),
     created_at: record.created_at?.toISOString() || null,
