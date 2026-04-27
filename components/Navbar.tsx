@@ -29,7 +29,7 @@ export default function Navbar({ role, parentStudentId }: { role: string; parent
             S
           </div>
           <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-l from-white to-sky-200">
-            سمارت سكان
+            Smart Scan
           </span>
         </div>
 
@@ -41,11 +41,10 @@ export default function Navbar({ role, parentStudentId }: { role: string; parent
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${
-                  isActive
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 ${isActive
                     ? "bg-white/10 text-sky-400 font-bold shadow-sm shadow-sky-500/20"
                     : "text-slate-300 hover:text-white hover:bg-white/5"
-                }`}
+                  }`}
               >
                 <Icon size={18} />
                 <span>{link.label}</span>
