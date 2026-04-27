@@ -9,6 +9,7 @@ export default function AttendanceClient({ initialData }: { initialData: any[] }
   const [view, setView] = useState<"rows" | "cards">("rows");
   const [search, setSearch] = useState("");
   const [period, setPeriod] = useState("today"); // today, week, month, all
+  const [selectedDate, setSelectedDate] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
@@ -16,11 +17,19 @@ export default function AttendanceClient({ initialData }: { initialData: any[] }
     setCollapsed(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  // Extract unique dates that have data
+  const availableDates = useMemo(() => {
+    const dates = Array.from(new Set(initialData.map(r => format(new Date(r.date), 'yyyy-MM-dd'))));
+    return dates.sort((a, b) => b.localeCompare(a)); // Descending
+  }, [initialData]);
+
   const filtered = useMemo(() => {
     let result = initialData;
 
-    // Filter by period
-    if (period === "today") {
+    // Filter by period or specific date
+    if (selectedDate) {
+      result = result.filter(r => format(new Date(r.date), 'yyyy-MM-dd') === selectedDate);
+    } else if (period === "today") {
       result = result.filter(r => isToday(new Date(r.date)));
     } else if (period === "week") {
       const lastWeek = subDays(new Date(), 7);
@@ -46,7 +55,7 @@ export default function AttendanceClient({ initialData }: { initialData: any[] }
     }
 
     return result;
-  }, [initialData, period, statusFilter, search]);
+  }, [initialData, period, selectedDate, statusFilter, search]);
 
   // Group by level -> class for Cards view
   const grouped = filtered.reduce((acc: any, record) => {
@@ -61,30 +70,58 @@ export default function AttendanceClient({ initialData }: { initialData: any[] }
   }, {});
 
   // Analytics for currently filtered data
+  const totalCount = filtered.length;
   const presentCount = filtered.filter((r) => r.status === "present").length;
   const lateCount = filtered.filter((r) => r.status === "late").length;
   const absentCount = filtered.filter((r) => r.status === "absent").length;
-  const totalCount = filtered.length;
+  
+  const presentPct = totalCount ? Math.round((presentCount / totalCount) * 100) : 0;
+  const latePct = totalCount ? Math.round((lateCount / totalCount) * 100) : 0;
+  const absentPct = totalCount ? Math.round((absentCount / totalCount) * 100) : 0;
 
   return (
     <div className="space-y-6">
       {/* Analytics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="glass-panel p-4 rounded-2xl border-l-4 border-l-blue-500">
+        <div className="glass-panel p-4 rounded-2xl border-l-4 border-l-blue-500 flex flex-col justify-between">
           <p className="text-sm text-slate-400">إجمالي السجلات</p>
           <p className="text-2xl font-bold text-white">{totalCount}</p>
         </div>
-        <div className="glass-panel p-4 rounded-2xl border-l-4 border-l-emerald-500">
-          <p className="text-sm text-slate-400">حضور</p>
-          <p className="text-2xl font-bold text-emerald-400">{presentCount}</p>
+        <div className="glass-panel p-4 rounded-2xl border-l-4 border-l-emerald-500 relative overflow-hidden group">
+          <div className="flex justify-between items-end relative z-10">
+            <div>
+              <p className="text-sm text-slate-400">حضور</p>
+              <p className="text-2xl font-bold text-emerald-400">{presentCount}</p>
+            </div>
+            <span className="text-xs font-bold text-emerald-500/50 group-hover:text-emerald-500 transition-colors">{presentPct}%</span>
+          </div>
+          <div className="absolute bottom-0 left-0 h-1 bg-emerald-500/20 w-full">
+            <div className="h-full bg-emerald-500" style={{ width: `${presentPct}%` }}></div>
+          </div>
         </div>
-        <div className="glass-panel p-4 rounded-2xl border-l-4 border-l-amber-500">
-          <p className="text-sm text-slate-400">تأخير</p>
-          <p className="text-2xl font-bold text-amber-400">{lateCount}</p>
+        <div className="glass-panel p-4 rounded-2xl border-l-4 border-l-amber-500 relative overflow-hidden group">
+          <div className="flex justify-between items-end relative z-10">
+            <div>
+              <p className="text-sm text-slate-400">تأخير</p>
+              <p className="text-2xl font-bold text-amber-400">{lateCount}</p>
+            </div>
+            <span className="text-xs font-bold text-amber-500/50 group-hover:text-amber-500 transition-colors">{latePct}%</span>
+          </div>
+          <div className="absolute bottom-0 left-0 h-1 bg-amber-500/20 w-full">
+            <div className="h-full bg-amber-500" style={{ width: `${latePct}%` }}></div>
+          </div>
         </div>
-        <div className="glass-panel p-4 rounded-2xl border-l-4 border-l-rose-500">
-          <p className="text-sm text-slate-400">غياب</p>
-          <p className="text-2xl font-bold text-rose-400">{absentCount}</p>
+        <div className="glass-panel p-4 rounded-2xl border-l-4 border-l-rose-500 relative overflow-hidden group">
+          <div className="flex justify-between items-end relative z-10">
+            <div>
+              <p className="text-sm text-slate-400">غياب</p>
+              <p className="text-2xl font-bold text-rose-400">{absentCount}</p>
+            </div>
+            <span className="text-xs font-bold text-rose-500/50 group-hover:text-rose-500 transition-colors">{absentPct}%</span>
+          </div>
+          <div className="absolute bottom-0 left-0 h-1 bg-rose-500/20 w-full">
+            <div className="h-full bg-rose-500" style={{ width: `${absentPct}%` }}></div>
+          </div>
         </div>
       </div>
 
@@ -103,13 +140,23 @@ export default function AttendanceClient({ initialData }: { initialData: any[] }
           </div>
           <select
             value={period}
-            onChange={(e) => setPeriod(e.target.value)}
+            onChange={(e) => { setPeriod(e.target.value); setSelectedDate(""); }}
             className="glass-input rounded-xl py-2 px-4 text-sm appearance-none"
           >
             <option value="today" className="bg-slate-900">اليوم فقط</option>
             <option value="week" className="bg-slate-900">آخر 7 أيام</option>
             <option value="month" className="bg-slate-900">آخر 30 يوم</option>
             <option value="all" className="bg-slate-900">كل السجلات</option>
+          </select>
+          <select
+            value={selectedDate}
+            onChange={(e) => { setSelectedDate(e.target.value); if(e.target.value) setPeriod(""); }}
+            className="glass-input rounded-xl py-2 px-4 text-sm appearance-none border border-sky-500/30"
+          >
+            <option value="" className="bg-slate-900">اختر يوماً محدداً...</option>
+            {availableDates.map(date => (
+              <option key={date} value={date} className="bg-slate-900">{date}</option>
+            ))}
           </select>
           <select
             value={statusFilter}
@@ -204,13 +251,18 @@ export default function AttendanceClient({ initialData }: { initialData: any[] }
             return (
               <div key={level} className="space-y-4">
                 <div 
-                  className="flex items-center gap-2 cursor-pointer group"
+                  className="flex items-center gap-3 cursor-pointer group"
                   onClick={() => toggleGroup(levelId)}
                 >
                   <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500/20 transition-colors">
                     {isLevelCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                   </div>
-                  <h2 className="text-xl font-bold text-emerald-300">المرحلة: {level}</h2>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-xl font-bold text-emerald-300">المرحلة: {level}</h2>
+                    <span className="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-500/20">
+                      {Object.values(grouped[level]).flat().length} سجل في المرحلة
+                    </span>
+                  </div>
                 </div>
 
                 {!isLevelCollapsed && (
@@ -222,12 +274,42 @@ export default function AttendanceClient({ initialData }: { initialData: any[] }
                       return (
                         <div key={cls} className="glass-panel rounded-2xl overflow-hidden border-l-4 border-l-emerald-500/50">
                           <div 
-                            className="p-4 bg-white/5 flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors"
+                            className="p-4 bg-white/5 flex flex-col md:flex-row md:items-center justify-between cursor-pointer hover:bg-white/10 transition-colors gap-4"
                             onClick={() => toggleGroup(classId)}
                           >
-                            <h3 className="font-bold text-slate-300">الفصل: {cls}</h3>
-                            <div className="text-slate-400">
-                              {isClassCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                            <div className="flex items-center gap-4">
+                              <h3 className="font-bold text-slate-300">الفصل: {cls}</h3>
+                              <span className="bg-slate-500/10 text-slate-400 px-2 py-0.5 rounded text-[10px] font-bold border border-white/5">
+                                {grouped[level][cls].length} سجل
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              {(() => {
+                                const stats = grouped[level][cls].reduce((acc: any, r: any) => {
+                                  acc[r.status] = (acc[r.status] || 0) + 1;
+                                  return acc;
+                                }, {});
+                                return (
+                                  <>
+                                    <div className="flex items-center gap-1.5">
+                                      <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                      <span className="text-[10px] font-bold text-emerald-400">{stats.present || 0} حضور</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                      <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                                      <span className="text-[10px] font-bold text-amber-400">{stats.late || 0} تأخير</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                      <div className="w-2 h-2 rounded-full bg-rose-500"></div>
+                                      <span className="text-[10px] font-bold text-rose-400">{stats.absent || 0} غياب</span>
+                                    </div>
+                                  </>
+                                );
+                              })()}
+                              <div className="text-slate-500 mr-2">
+                                {isClassCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                              </div>
                             </div>
                           </div>
 

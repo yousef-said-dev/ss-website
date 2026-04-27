@@ -15,33 +15,57 @@ export function exportToExcel<T>(
 ) {
   const wb = XLSX.utils.book_new();
   
-  // Group data by level
-  const grouped: Record<string, any[]> = {};
+  // Group data by level and class for summary
+  const grouped: Record<string, Record<string, any[]>> = {};
   
   data.forEach((row) => {
     const level = getLevel(row) || "غير محدد";
-    if (!grouped[level]) {
-      grouped[level] = [];
-    }
-    grouped[level].push(mapRow(row));
+    // For summary we need the original class, so we assume mapRow returns it or we extract it
+    // But mapRow is for the sheet columns. Let's use the row directly for grouping.
+    const mapped = mapRow(row);
+    const cls = (row as any).class || (row as any).students?.class || "غير محدد";
+
+    if (!grouped[level]) grouped[level] = {};
+    if (!grouped[level][cls]) grouped[level][cls] = [];
+    
+    grouped[level][cls].push(mapped);
   });
 
-  // If there's no data, create an empty sheet
+  // 1. Create Summary Sheet
+  const summaryData: any[] = [];
+  Object.keys(grouped).forEach(level => {
+    const levelStudents = Object.values(grouped[level]).flat();
+    summaryData.push({
+      "المرحلة": level,
+      "الفصل": "--- إجمالي المرحلة ---",
+      "العدد": levelStudents.length
+    });
+
+    Object.keys(grouped[level]).forEach(cls => {
+      summaryData.push({
+        "المرحلة": level,
+        "الفصل": cls,
+        "العدد": grouped[level][cls].length
+      });
+    });
+  });
+
+  if (summaryData.length > 0) {
+    const wsSummary = XLSX.utils.json_to_sheet(summaryData);
+    if(!wsSummary['!dir']) wsSummary['!dir'] = 'rtl';
+    XLSX.utils.book_append_sheet(wb, wsSummary, "ملخص عام");
+  }
+
+  // 2. Create individual sheets for each level
   if (Object.keys(grouped).length === 0) {
     const ws = XLSX.utils.json_to_sheet([]);
     XLSX.utils.book_append_sheet(wb, ws, "لا توجد بيانات");
   } else {
-    // Create a sheet for each level
     Object.keys(grouped).forEach((level) => {
-      // Create worksheet
-      const ws = XLSX.utils.json_to_sheet(grouped[level]);
-      
-      // Set right-to-left if desired (Excel feature, sometimes works in sheetjs)
+      const levelData = Object.values(grouped[level]).flat();
+      const ws = XLSX.utils.json_to_sheet(levelData);
       if(!ws['!dir']) ws['!dir'] = 'rtl';
-
-      // Ensure sheet name is valid (max 31 chars, no forbidden chars like : \ / ? * [ ])
       const safeSheetName = level.replace(/[:\\/?*\[\]]/g, '').substring(0, 31);
-      
       XLSX.utils.book_append_sheet(wb, ws, safeSheetName);
     });
   }
@@ -49,3 +73,4 @@ export function exportToExcel<T>(
   // Generate Excel file and trigger download
   XLSX.writeFile(wb, `${fileName}.xlsx`);
 }
+

@@ -82,6 +82,10 @@ export default function StudentsClient({ initialStudents }: { initialStudents: a
       {/* Header & Controls */}
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between glass-panel p-4 rounded-2xl">
         <div className="flex items-center gap-4 w-full md:w-auto">
+          <div className="bg-sky-500/10 px-4 py-2 rounded-xl border border-sky-500/20">
+            <p className="text-[10px] text-sky-400 font-bold uppercase tracking-wider">إجمالي الطلاب</p>
+            <p className="text-xl font-bold text-white">{initialStudents.length}</p>
+          </div>
           <div className="relative flex-1 md:w-64">
             <Search className="absolute right-3 top-3 w-5 h-5 text-slate-400" />
             <input
@@ -297,15 +301,12 @@ export default function StudentsClient({ initialStudents }: { initialStudents: a
 
             return (
               <div key={level} className="space-y-4">
-                <div 
-                  className="flex items-center gap-2 cursor-pointer group"
-                  onClick={() => toggleGroup(levelId)}
-                >
-                  <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center text-sky-400 group-hover:bg-sky-500/20 transition-colors">
-                    {isLevelCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                  <div className="flex items-center gap-3 border-b border-sky-500/30 pb-2">
+                    <h2 className="text-2xl font-bold text-sky-300">المرحلة: {level}</h2>
+                    <span className="bg-sky-500/10 text-sky-400 px-3 py-1 rounded-full text-xs font-bold border border-sky-500/20">
+                      إجمالي المرحلة: {Object.values(grouped[level]).flat().length} طالب
+                    </span>
                   </div>
-                  <h2 className="text-2xl font-bold text-sky-300 border-b border-sky-500/30 pb-2 inline-block">المرحلة: {level}</h2>
-                </div>
 
                 {!isLevelCollapsed && (
                   <div className="space-y-6 pr-4 border-r border-white/5 mr-4">
@@ -319,7 +320,12 @@ export default function StudentsClient({ initialStudents }: { initialStudents: a
                             className="p-4 bg-white/5 flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors"
                             onClick={() => toggleGroup(classId)}
                           >
-                            <h3 className="text-lg font-bold text-purple-300">الفصل: {cls}</h3>
+                            <div className="flex items-center gap-4">
+                              <h3 className="text-lg font-bold text-purple-300">الفصل: {cls}</h3>
+                              <span className="bg-purple-500/10 text-purple-400 px-3 py-1 rounded-lg text-xs font-bold border border-purple-500/20">
+                                {grouped[level][cls].length} طالب
+                              </span>
+                            </div>
                             <div className="text-slate-400">
                               {isClassCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                             </div>

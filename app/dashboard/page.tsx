@@ -27,14 +27,18 @@ export default async function Dashboard() {
     include: { students: true }
   });
 
+  // Check if attendance session has actually started (at least one person arrived)
+  const isStarted = todaysAttendance.some((a: any) => a.status === "present" || a.status === "late");
+
   const presentCount = todaysAttendance.filter((a: any) => a.status === "present").length;
   const lateCount = todaysAttendance.filter((a: any) => a.status === "late").length;
-  const absentCount = todaysAttendance.filter((a: any) => a.status === "absent").length;
+  // Only count absentees if the session has started
+  const absentCount = isStarted ? todaysAttendance.filter((a: any) => a.status === "absent").length : 0;
 
   const totalToday = todaysAttendance.length;
   const presentPercent = totalToday ? Math.round((presentCount / totalToday) * 100) : 0;
   const latePercent = totalToday ? Math.round((lateCount / totalToday) * 100) : 0;
-  const absentPercent = totalToday ? Math.round((absentCount / totalToday) * 100) : 0;
+  const absentPercent = isStarted && totalToday ? Math.round((absentCount / totalToday) * 100) : 0;
 
   const stats = [
     { label: "إجمالي الطلاب", value: totalStudents, icon: Users, color: "from-blue-500 to-sky-400" },
@@ -43,12 +47,17 @@ export default async function Dashboard() {
     { label: "غياب اليوم", value: absentCount, percent: absentPercent, icon: UserX, color: "from-rose-500 to-red-400" },
   ];
 
-  // Fetch recent activity
+  // Fetch recent activity for today (only show people who arrived)
   const recentAttendance = await prisma.attendance.findMany({
+    where: {
+      date: { gte: today },
+      status: { in: ['present', 'late'] }
+    },
     take: 5,
     orderBy: { created_at: 'desc' },
     include: { students: true }
   });
+
 
   // Distribution by level
   const studentsByYear = await prisma.students.groupBy({
