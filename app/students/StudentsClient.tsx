@@ -251,7 +251,7 @@ export default function StudentsClient({ initialStudents }: { initialStudents: a
       {view === "rows" && (
         <div className="glass-panel rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-right text-sm">
+            <table className="w-full text-right text-sm min-w-[600px]">
               <thead className="bg-slate-800/80 text-sky-200">
                 <tr>
                   <th className="px-6 py-4 font-semibold">الاسم</th>

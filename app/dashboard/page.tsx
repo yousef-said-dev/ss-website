@@ -125,8 +125,9 @@ export default async function Dashboard() {
             </div>
           </div>
           <div className="glass-panel rounded-3xl overflow-hidden">
-            <table className="w-full text-right">
-              <thead className="bg-white/5 text-slate-400 text-xs uppercase tracking-wider">
+            <div className="overflow-x-auto">
+              <table className="w-full text-right min-w-[500px]">
+                <thead className="bg-white/5 text-slate-400 text-xs uppercase tracking-wider">
                 <tr>
                   <th className="px-6 py-4 font-bold">الطالب</th>
                   <th className="px-6 py-4 font-bold">المرحلة</th>
@@ -156,6 +157,7 @@ export default async function Dashboard() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
 

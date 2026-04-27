@@ -193,7 +193,7 @@ export default async function StudentProfile({ params }: { params: Promise<{ id:
                 <h3 className="font-bold text-slate-200">{month}</h3>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-right">
+                <table className="w-full text-sm text-right min-w-[500px]">
                   <thead className="bg-white/3 text-slate-400 text-xs">
                     <tr>
                       <th className="px-6 py-3">التاريخ</th>

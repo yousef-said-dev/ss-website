@@ -1,12 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, UserCheck, ShieldAlert, LogOut, User } from "lucide-react";
+import { LayoutDashboard, Users, UserCheck, ShieldAlert, LogOut, User, Menu, X } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 
 export default function Navbar({ role, parentStudentId }: { role: string; parentStudentId?: number }) {
   const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const adminLinks = [
     { href: "/dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
@@ -33,6 +35,7 @@ export default function Navbar({ role, parentStudentId }: { role: string; parent
           </span>
         </div>
 
+        {/* Desktop Links */}
         <div className="hidden md:flex gap-6">
           {links.map((link) => {
             const Icon = link.icon;
@@ -53,14 +56,56 @@ export default function Navbar({ role, parentStudentId }: { role: string; parent
           })}
         </div>
 
-        <button
-          onClick={() => logout()}
-          className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors px-4 py-2 rounded-xl hover:bg-red-500/10"
-        >
-          <span>تسجيل خروج</span>
-          <LogOut size={18} />
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => logout()}
+            className="hidden md:flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors px-4 py-2 rounded-xl hover:bg-red-500/10"
+          >
+            <span>تسجيل خروج</span>
+            <LogOut size={18} />
+          </button>
+
+          {/* Mobile Menu Toggle */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 text-slate-300 hover:text-white transition-colors"
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden mt-4 pt-4 border-t border-white/10 flex flex-col gap-2 animate-in slide-in-from-top-2 duration-200">
+          {links.map((link) => {
+            const Icon = link.icon;
+            const isActive = pathname.startsWith(link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${isActive
+                    ? "bg-white/10 text-sky-400 font-bold shadow-sm shadow-sky-500/20"
+                    : "text-slate-300 hover:text-white hover:bg-white/5"
+                  }`}
+              >
+                <Icon size={20} />
+                <span>{link.label}</span>
+              </Link>
+            );
+          })}
+          
+          <button
+            onClick={() => { setIsMobileMenuOpen(false); logout(); }}
+            className="flex items-center gap-3 text-red-400 hover:text-red-300 transition-colors px-4 py-3 rounded-xl hover:bg-red-500/10 mt-2"
+          >
+            <LogOut size={20} />
+            <span>تسجيل خروج</span>
+          </button>
+        </div>
+      )}
     </nav>
   );
 }
