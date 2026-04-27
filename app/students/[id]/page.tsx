@@ -72,7 +72,7 @@ export default async function StudentProfile({ params }: { params: Promise<{ id:
 
   // Group attendance by month for visual display
   const monthlyData: { [key: string]: any[] } = {};
-  student.attendance.forEach(a => {
+  student.attendance.forEach((a: any) => {
     const monthKey = format(new Date(a.date), "yyyy/MM");
     if (!monthlyData[monthKey]) monthlyData[monthKey] = [];
     monthlyData[monthKey].push(a);
