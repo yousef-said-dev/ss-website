@@ -126,8 +126,8 @@ export default function AttendanceClient({ initialData }: { initialData: any[] }
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between glass-panel p-4 rounded-2xl">
-        <div className="flex items-center gap-4 w-full md:w-auto flex-wrap">
+      <div className="flex flex-col xl:flex-row gap-6 items-center justify-between glass-panel p-4 rounded-2xl">
+        <div className="flex flex-col md:flex-row flex-wrap items-center gap-4 w-full xl:w-auto">
           <div className="relative flex-1 md:w-64 min-w-[200px]">
              <Search className="absolute right-3 top-3 w-5 h-5 text-slate-400" />
             <input
@@ -170,7 +170,7 @@ export default function AttendanceClient({ initialData }: { initialData: any[] }
           </select>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-3 w-full xl:w-auto mt-4 xl:mt-0">
           <div className="flex bg-slate-800/50 rounded-lg p-1">
             <button
               onClick={() => setView("rows")}

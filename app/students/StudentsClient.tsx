@@ -80,8 +80,8 @@ export default function StudentsClient({ initialStudents }: { initialStudents: a
   return (
     <div className="space-y-6">
       {/* Header & Controls */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between glass-panel p-4 rounded-2xl">
-        <div className="flex items-center gap-4 w-full md:w-auto">
+      <div className="flex flex-col xl:flex-row gap-6 items-center justify-between glass-panel p-4 rounded-2xl">
+        <div className="flex flex-col md:flex-row flex-wrap items-center gap-4 w-full xl:w-auto">
           <div className="bg-sky-500/10 px-4 py-2 rounded-xl border border-sky-500/20">
             <p className="text-[10px] text-sky-400 font-bold uppercase tracking-wider">إجمالي الطلاب</p>
             <p className="text-xl font-bold text-white">{initialStudents.length}</p>
@@ -118,7 +118,7 @@ export default function StudentsClient({ initialStudents }: { initialStudents: a
           </select>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3 w-full xl:w-auto mt-4 xl:mt-0">
           <div className="flex bg-slate-800/50 rounded-lg p-1">
             <button
               onClick={() => setView("rows")}
